@@ -37,34 +37,180 @@ git tag v0.1.0 && git push origin v0.1.0   # 触发 Build workflow → exe 自�
 
 Release notes 直接粘贴 CHANGELOG 的 0.1.0 段落 + demo GIF。
 
-## 2. 五渠道文案
+## 2. 五渠道文案（定稿，照抄即发）
 
-### V2EX（分享创造节点，首选，发完 1h 内自己顶一次评论补 GIF）
+> 通用素材：`docs/demo.gif`（1.7MB，Reddit/即刻直接上传原生托管）、`docs/screenshots/guide-html.png`、`settings.png`。
+> 顺序建议：V2EX → 即刻（同日或隔日）→ Reddit 三连（间隔 1~2 天）→ X → Show HN。
+> 美国向渠道（Reddit/X/HN）最佳时间：**北京时间 21:00~24:00**（美国早间），周末更佳。
+> 每个渠道标题/开头必须不同，避免反 spam；发帖 1 小时内自己补一条评论。
 
-> 标题：SnapStep：按一次快捷键，把操作过程变成图文教程（开源）
->
-> 做内部文档/给同事写操作手册时，截图-编号-写步骤太费时间。
-> SnapStep 常驻托盘，按 Ctrl+Alt+S 开始，正常操作，再按一次停止，
-> 自动得到带序号标注截图的 Markdown/HTML/Word 教程。
-> 可选接 GLM/DeepSeek/OpenAI 把文案写得更自然，不接也能用（本地模板）。
-> 全程本机处理，密码框输入自动隐藏，MIT 开源。
-> GitHub：链接 → 求 star / 求反馈，Windows 优先，macOS 在路线图。
+### 2.1 V2EX（中文 · 分享创造节点，首选）
 
-### 即刻（原文转贴 + 一张 GIF，带上 #开源# #效率工具# 话题）
+标题：
 
-### Reddit（英文）
+```
+SnapStep：按一次快捷键，把屏幕操作变成图文教程（开源）
+```
 
-- r/SideProject、r/selfhosted、r/opensource：
-> I built an open-source Scribe alternative: press a hotkey, do your work,
-> press again — get a step-by-step guide with auto-annotated screenshots.
-> Runs 100% locally on Windows, exports MD/HTML/DOCX, optional AI polish
-> via any OpenAI-compatible API. MIT, no telemetry.
+正文：
 
-### X / Twitter（GIF + 一句话 + GitHub 链接，可同时发中文推）
+```
+各位好，分享一个刚开源的小工具 SnapStep（MIT）。
 
-### Hacker News（Show HN，等 GIF 和对比表都满意后再发）
+场景：给同事写操作手册、给家人写软件教程、给自己留 SOP——传统流程是
+「截图 → 编号 → 粘进文档 → 写步骤」，一篇 10 步的教程起码半小时。
+SnapStep 把它压缩成：按快捷键 → 正常操作 → 再按一次。
 
-> Show HN: SnapStep – Open-source Scribe alternative, records clicks into guides
+- 常驻托盘，Ctrl+Alt+S 随时开始/停止
+- 每次左键点击自动成为一步：延迟截屏（等菜单/弹窗先弹出来），导出时自动叠加
+  点击高亮圈和步骤序号；键入的文字自动归进步骤
+- 停止后自动导出 Markdown / 单文件 HTML（截图 base64 内嵌，发微信就是成品页）/ Word
+- 可选 AI 润色文案：任何 OpenAI 兼容接口都行（GLM / DeepSeek / OpenAI / 本地 Ollama）；
+  不配 key 也能用——本地模板兜底，教程永远能生成
+- 隐私：全程本机处理、零遥测；密码框输入自动隐藏（UI Automation 尽力检测）；
+  隐私模式一键停截屏
+
+30 秒演示 GIF 就在 README 第一屏——那条 GIF 也是这个工具自己录自己生成的。
+
+仓库：https://github.com/Felixssss-106/snapstep
+免安装 exe：https://github.com/Felixssss-106/snapstep/releases/tag/v0.1.0（63MB，Win10/11）
+Python 3.10+ / PySide6，MIT，欢迎 issue 和 PR。
+
+求 star，更求真实场景反馈：你最想拿它写哪类教程？
+```
+
+### 2.2 即刻（中文）
+
+正文（配 `demo.gif` + `guide-html.png` 两张图，带话题 #开源# #效率工具#）：
+
+```
+做了个开源小工具 SnapStep 📸
+
+按一次快捷键正常干活，再按一次——刚才的操作自动变成带标注截图的图文教程，
+Markdown / 单文件 HTML / Word 三种格式，截图自动加点击高亮圈和步骤编号。
+
+全程本机运行，密码框自动隐藏，零遥测；
+可选接 GLM/DeepSeek/OpenAI 润色文案，不接也能用（本地模板兜底）。
+
+开源版 Scribe 平替，MIT，Windows 先行（macOS 在路线图）。
+GitHub 搜 Felixssss-106/snapstep，求 star 求反馈 🙏
+```
+
+### 2.3 X / Twitter
+
+英文（主帖）：
+
+```
+Open-source Scribe alternative 📸
+
+Press a hotkey → do your work → press again.
+Get a step-by-step guide with auto-annotated screenshots.
+100% local, MIT, exports MD/HTML/DOCX, optional AI polish.
+
+https://github.com/Felixssss-106/snapstep
+```
+
+中文（可同日另发一条）：
+
+```
+开源小工具 SnapStep：按一次快捷键正常干活，再按一次，
+操作自动变成带标注截图的图文教程（Markdown/HTML/Word）。
+全程本机、MIT、可选 AI 润色。
+
+https://github.com/Felixssss-106/snapstep
+```
+
+### 2.4 Reddit（英文三篇，间隔 1~2 天；r/selfhosted 不发——只收自托管服务器）
+
+**① r/SideProject**（Text 帖 + 原生上传 demo.gif）
+
+Title:
+
+```
+I built an open-source Scribe alternative — press a hotkey, do your work, press again, get a step-by-step guide with annotated screenshots (MIT, Windows)
+```
+
+Body:
+
+```
+Scribe/Tango work great but are paid per seat and everything goes through their cloud. I wanted the same workflow running 100% locally, so I built SnapStep (MIT, Python/Qt).
+
+How it works:
+1. Press Ctrl+Alt+S (lives in the system tray)
+2. Do your thing — every left click becomes a step: auto screenshot, click position highlighted, typed text captured into the step
+3. Press the hotkey again → a polished guide is generated: Markdown, single-file HTML, or Word
+
+Highlights:
+- 100% local, zero telemetry. Password fields are masked (best effort) + a privacy mode that skips screenshots entirely
+- Optional AI copywriting via any OpenAI-compatible API (GLM / DeepSeek / OpenAI / local Ollama) — but it works with zero config too (local template fallback, the guide always gets generated)
+- 30s demo in the README — the GIF was actually recorded by the app itself
+
+Repo (MIT): https://github.com/Felixssss-106/snapstep
+Portable exe: https://github.com/Felixssss-106/snapstep/releases/tag/v0.1.0
+
+Windows first, macOS on the roadmap. What would you use it for — onboarding docs, SOPs, tutorials for family?
+```
+
+**② r/opensource**（Text 帖，按右侧 flair 选项选一个）
+
+Title:
+
+```
+SnapStep — MIT Scribe alternative for Windows (Python/Qt): recorded clicks become step-by-step guides with annotated screenshots
+```
+
+Body:
+
+```
+Repo: https://github.com/Felixssss-106/snapstep (MIT)
+
+SnapStep records on-screen actions and generates documentation. A global hotkey starts/stops a session; each left click becomes a step (delayed capture so menus/popups settle, click position highlighted with a ring + step number at export), and typed text is attached to the step. Export to Markdown, single-file HTML (base64-embedded images, shareable as one file), or DOCX.
+
+- Copywriting is pluggable: deterministic local template by default, or any OpenAI-compatible endpoint (GLM / DeepSeek / OpenAI / Ollama) for natural text; if the API fails it silently falls back to the template, so a guide is always produced
+- Privacy: everything runs locally, no telemetry; password fields masked via UI Automation (best effort); privacy mode disables screenshots entirely; the API endpoint is validated (scheme allowlist, metadata/link-local ranges blocked, redirects rejected) so the key can't be redirected
+- Packaging: PyInstaller one-file exe, built automatically by GitHub Actions on every tag; tests run on 3.10/3.14 (27 tests)
+
+Known limitations: Windows first (macOS planned), UI is Chinese-first with English UI on the roadmap (README is bilingual), hotkeys are validated-then-parsed from a config file.
+
+Feedback especially welcome on the HTML export template and the AI prompt design.
+```
+
+**③ r/coolgithubprojects**（Link 帖，链接填仓库）
+
+Title:
+
+```
+SnapStep – open-source Scribe alternative: record screen actions, get step-by-step guides with annotated screenshots (Python/Qt, MIT)
+```
+
+### 2.5 Hacker News（Show HN，最后发）
+
+标题：
+
+```
+Show HN: SnapStep – Open-source Scribe alternative, records clicks into guides
+```
+
+首评模板（HN 发帖没有正文区，技术细节自己抢首评）：
+
+```
+Hi HN! I built SnapStep because writing SOPs and software tutorials by hand
+(screenshot → number → paste → describe) was eating hours.
+
+It's a Windows tray app: global hotkey starts recording, every left click
+becomes a step with an auto-captured screenshot, typed text is attached,
+and stopping produces a Markdown / single-file HTML / Word guide.
+
+Design decisions you might care about:
+- Copy generation is pluggable: deterministic local template by default,
+  or any OpenAI-compatible API; AI failure degrades to the template
+- Screenshots are taken ~350ms after each click so menus settle, and the
+  click ring + step number are drawn at export, not at capture
+- Password fields are masked via UI Automation (best effort); API endpoints
+  are validated (scheme allowlist, metadata ranges blocked, no redirects)
+
+MIT, Python 3.10+, source: https://github.com/Felixssss-106/snapstep
+```
 
 ## 3. Awesome 列表 PR（发布后第 2~3 天）
 
