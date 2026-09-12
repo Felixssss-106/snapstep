@@ -158,7 +158,10 @@ def _valid_keys(cfg: Config) -> list[str]:
 
 def cmd_demo(args, cfg: Config) -> int:
     session = _build_demo_session()
-    session_dir = Path(args.out)
+    # 默认输出到用户主目录：相对路径会在 system32 等只读目录里炸掉
+    session_dir = (
+        Path(args.out).expanduser() if args.out else Path.home() / "snapstep-demo"
+    )
     _render_demo_screenshots(session, session_dir)
     used, paths = generate_and_export(
         session, session_dir, cfg, fmt=args.format, use_ai=not args.no_ai
@@ -272,7 +275,7 @@ def main(argv: list[str] | None = None) -> int:
     p_config.add_argument("value", nargs="?", help="set 时的新值")
 
     p_demo = sub.add_parser("demo", help="生成示例教程，验证安装")
-    p_demo.add_argument("--out", default="snapstep-demo")
+    p_demo.add_argument("--out", help="输出目录（默认 ~/snapstep-demo）")
     p_demo.add_argument("--format", choices=["md", "html", "docx", "all"])
     p_demo.add_argument("--no-ai", action="store_true")
 

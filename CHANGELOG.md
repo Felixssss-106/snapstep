@@ -3,6 +3,13 @@
 所有显著变更记录在本文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.1] - 2026-09-12
+
+### Fixed
+
+- `snapstep demo` 默认输出目录改为 `~/snapstep-demo`：此前是相对当前目录的
+  `snapstep-demo`，在 `C:\WINDOWS\system32` 等只读目录里运行会直接 PermissionError
+
 ## [0.2.0] - 2026-09-12
 
 ### Fixed
