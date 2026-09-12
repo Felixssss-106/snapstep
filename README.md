@@ -117,6 +117,8 @@ snapstep config set api.api_key 你的key
 - [ ] PDF 导出、团队模板
 - [ ] macOS 支持
 
+软件可能存在问题，V0.1.0版本已知问题：快捷键无法使用，截屏延迟不合适，目前正在修复
+
 欢迎按 [issues](https://github.com/Felixssss-106/snapstep/issues) 提需求。
 
 ## 🧪 开发
@@ -160,6 +162,8 @@ step-by-step guide — press a hotkey, do your work, press it again.
 pip install snapstep
 snapstep demo   # generate a sample guide to verify the install
 ```
+
+There may be issues with the software. Known issues in version V0.1.0 include non-functional keyboard shortcuts and inappropriate screenshot latency; these are currently being fixed.
 
 See the Chinese sections above for full docs — the UI is Chinese-first,
 and English UI is on the roadmap. English issues/PRs are welcome!
