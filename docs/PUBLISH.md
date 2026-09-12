@@ -7,13 +7,15 @@
 
 - [x] **录 30s 演示 GIF**（2026-09-12 已完成，`docs/demo.gif`，1080px/10fps/1.7MB；
   重录思路：ffmpeg ddagrab 抓屏 + `snapstep record` 子进程 + pynput 驱动真实操作 + Chrome `--app` 模式展示成品）
-  1. Win+G 或用 ScreenToGif 录制
-  2. 脚本：托盘点「开始录制」→ 打开一个真实软件（如 微信设置/浏览器书签整理）做 5~6 步操作（含一次输入）→ 停止 → 展示生成的 HTML 教程滚动浏览
-  3. 导出 GIF，压缩到 < 8MB（gifski / ezgif），存为 `docs/demo.gif`，替换 README 中的 TODO 注释
-- [ ] 用 GitHub Actions 打的 exe 本机实测：安装、录制、导出、设置四件事
-- [ ] `pytest` 与 `ruff check` 全绿
-- [ ] 确认 `pyproject.toml` 的 Homepage/Issues URL 正确
-- [ ] 准备 3~5 张截图备用（设置界面、HTML 成品、Markdown 成品）
+- [x] `pytest` 与 `ruff check` 全绿（27 passed / All checks passed，2026-09-12）
+- [x] 确认 `pyproject.toml` 的 Homepage/Issues URL 正确（全部指向 Felixssss-106/snapstep，与发布命令一致）
+- [x] 备用截图：`docs/screenshots/` 下已有 guide-html.png（首屏）、guide-html-full.png（整页）、guide-md.png（Markdown 源码）
+- [ ] **exe 本机交互实测**：打包/启动/托盘已验证 ✓；托盘菜单驱动的 录制→导出 与 设置对话框
+  两项交互实测待补（录制时检测到电脑正在被使用，为避免干扰输入而暂停）。
+  注意：本机 pynput 构建的 GlobalHotKeys 忽略 injected 事件，**自动化注入测不了热键**，
+  人工按 `Ctrl+Alt+S` 即可（物理键盘 injected=False，不受影响）
+- [ ] 补拍 `settings.png`（设置界面实机截图；Qt offscreen 渲染缺中文字体不可用）
+- [ ] **安装 gh CLI**（本机未装）：`winget install GitHub.cli` 然后 `gh auth login`
 
 ## 1. 发布动作（顺序执行）
 
