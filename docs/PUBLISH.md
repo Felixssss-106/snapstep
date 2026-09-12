@@ -1,5 +1,9 @@
 # SnapStep 发布执行手册
 
+> **发布状态：v0.1.0 已于 2026-09-12 正式发布** ✅
+> 仓库：https://github.com/Felixssss-106/snapstep · Release（含 exe）：https://github.com/Felixssss-106/snapstep/releases/tag/v0.1.0
+> CI：Test（3.10/3.14）与 Build（Windows exe）均绿。以下第 0/1 节已执行完毕，第 2~4 节（渠道推广）待发。
+
 目标：v0.1.0 发布后 2 周内拿到第一波 star 与真实用户反馈。
 打法沿用 deep-research-cn 验证过的五渠道节奏，先国内后国际。
 
