@@ -26,8 +26,9 @@ API_PRESETS: dict[str, dict[str, str]] = {
 
 @dataclass
 class CaptureConfig:
-    delay_ms: int = 350  # 点击后等待再截屏，让弹窗/菜单先弹出来
+    settle_max_ms: int = 1500  # 点击后等待界面稳定的上限，期间持续比对帧，稳定即取「稳定帧」
     image_format: str = "png"
+    filter_idle_clicks: bool = True  # 停止时自动剔除画面无变化且无输入的无效点击
 
 
 @dataclass

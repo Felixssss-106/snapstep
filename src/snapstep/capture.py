@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -47,14 +48,63 @@ class ScreenCapture:
 
 
 def save_screenshot(
-    img: Image.Image, session_dir: Path, index: int, image_format: str = "png"
+    img: Image.Image,
+    session_dir: Path,
+    index: int,
+    image_format: str = "png",
+    suffix: str = "",
 ) -> str:
-    """保存原始截图，返回相对 session 目录的 POSIX 风格路径。"""
+    """保存原始截图，返回相对 session 目录的 POSIX 风格路径。
+
+    suffix 用于区分同一步骤的候选帧（如 "-imm" / "-set"）。
+    """
     images_dir = session_dir / "images"
     images_dir.mkdir(parents=True, exist_ok=True)
-    path = images_dir / f"step-{index:02d}.{image_format}"
+    path = images_dir / f"step-{index:02d}{suffix}.{image_format}"
     img.save(path)
     return path.relative_to(session_dir).as_posix()
+
+
+# 图片相似度：缩到 96x54 灰度后逐像素求平均绝对差（0~255）。
+# < 2.0 视为「画面没变」，> 4.0 视为「明显变化」。
+_SIMILARITY_SIZE = (96, 54)
+
+
+def mean_diff(a: Path | Image.Image, b: Path | Image.Image) -> float:
+    """两张截图的平均像素差（0~255），越小越相似。"""
+    pa = a if isinstance(a, Image.Image) else Image.open(a)
+    pb = b if isinstance(b, Image.Image) else Image.open(b)
+    ga = pa.convert("L").resize(_SIMILARITY_SIZE)
+    gb = pb.convert("L").resize(_SIMILARITY_SIZE)
+    da = list(ga.getdata())
+    db = list(gb.getdata())
+    total = sum(abs(x - y) for x, y in zip(da, db, strict=True))
+    return total / len(da)
+
+
+def settle_grab(
+    capture: ScreenCapture,
+    monitor: dict,
+    max_wait_ms: int,
+    poll_ms: int = 150,
+    stable_diff: float = 1.5,
+) -> tuple[Image.Image, int]:
+    """轮询截屏直到画面连续两帧几乎不变（界面稳定），或超时。
+
+    返回 (稳定帧图像, 实际等待毫秒数)。
+    """
+    deadline = time.monotonic() + max(max_wait_ms, 0) / 1000
+    last = capture.grab_monitor(monitor)
+    waited = 0
+    while True:
+        if time.monotonic() >= deadline:
+            return last, waited
+        time.sleep(poll_ms / 1000)
+        waited += poll_ms
+        current = capture.grab_monitor(monitor)
+        if mean_diff(last, current) < stable_diff:
+            return current, waited
+        last = current
 
 
 def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:

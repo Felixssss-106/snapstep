@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import re
 import sys
+import threading
 from pathlib import Path
+
+from PySide6.QtCore import QObject, Signal
+
+from ..log import log_error, log_info
 
 RESOURCES = Path(__file__).resolve().parents[1] / "resources"
 
@@ -107,8 +112,29 @@ class Overlay:
         self._widget.hide()
 
 
-class TrayApp:
+class _HotkeyHandle:
+    """RegisterHotKey 线程句柄：stop 时投递 WM_QUIT 结束消息循环。
+
+    热键随注册线程退出自动注销（hwnd=None 时与线程绑定）。
+    """
+
+    def __init__(self, thread: threading.Thread) -> None:
+        self.thread = thread
+
+    def stop(self) -> None:
+        import ctypes
+
+        if self.thread.ident:
+            ctypes.windll.user32.PostThreadMessageW(self.thread.ident, 0x0012, 0, 0)
+        self.thread.join(timeout=1)
+
+
+class TrayApp(QObject):
+    toggle_requested = Signal()
+
     def __init__(self) -> None:
+        QObject.__init__(self)
+        self.toggle_requested.connect(self.toggle)
         from PySide6.QtGui import QAction, QIcon
         from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
@@ -180,6 +206,15 @@ class TrayApp:
         self.recorder = Recorder(self.config)
         self.recorder.on_step_captured = self._on_step
         self.recorder.start()
+        log_info("recording started")
+        from PySide6.QtWidgets import QSystemTrayIcon
+
+        self.tray.showMessage(
+            "开始录制",
+            f"再次按 {self.config.hotkey} 或托盘菜单停止",
+            QSystemTrayIcon.Information,
+            2500,
+        )
         self.action_toggle.setText("停止录制")
         self.tray.setToolTip("SnapStep — 录制中")
         self.overlay.show()
@@ -222,25 +257,73 @@ class TrayApp:
     # ---------- 快捷键 ----------
 
     def _start_hotkey(self) -> None:
-        """启动全局快捷键监听（独立线程，可 stop 后重建）。"""
-        try:
-            from pynput import keyboard
-        except Exception:
-            return  # 快捷键不可用时仅托盘菜单可用
-
-        combo = safe_hotkey(self.config.hotkey)
+        """注册全局快捷键：优先 Win32 RegisterHotKey（OS 级、最可靠），
+        失败（如被其它程序占用）时回退 pynput GlobalHotKeys。"""
         old = self._hotkey
         if old is not None:
             old.stop()
+            self._hotkey = None
+        if self._try_register_hotkey():
+            return
+        try:
+            from pynput import keyboard
+        except Exception:
+            log_error("hotkey: pynput unavailable, tray menu only")
+            return
+        combo = safe_hotkey(self.config.hotkey)
         self._hotkey = keyboard.GlobalHotKeys({combo: self._hotkey_fired})
         self._hotkey.daemon = True
         self._hotkey.start()
+        log_info(f"hotkey: GlobalHotKeys fallback on {combo}")
+
+    def _try_register_hotkey(self) -> bool:
+        """用 Win32 RegisterHotKey 注册热键（线程内消息循环）。
+
+        组合键经 safe_hotkey 白名单校验后解析，vk 码只来自白名单词表，
+        不存在外部输入直达 FFI 的路径。Ctrl+Alt+S 之类的修饰键组合才会走到这里。
+        """
+        if sys.platform != "win32":
+            return False
+        import ctypes
+        from ctypes import wintypes
+
+        MOD = {"alt": 0x0001, "ctrl": 0x0002, "shift": 0x0004, "cmd": 0x0008}
+        parts = safe_hotkey(self.config.hotkey).split("+")
+        *mods, key = parts
+        mod_bits = 0
+        for m in mods:
+            name = m.strip("<>").lower()
+            if name not in MOD:
+                return False
+            mod_bits |= MOD[name]
+        if key.startswith("<f") and key[2:-1].isdigit():
+            vk = 0x70 + int(key[2:-1]) - 1  # VK_F1 = 0x70
+        elif len(key) == 1 and key.isalnum():
+            vk = ord(key.upper())
+        else:
+            return False
+
+        WM_HOTKEY = 0x0312
+        user32 = ctypes.windll.user32
+
+        def _loop() -> None:
+            if not user32.RegisterHotKey(None, 0xB00B, mod_bits, vk):
+                log_error("hotkey: RegisterHotKey failed (conflict?)")
+                return
+            msg = wintypes.MSG()
+            log_info(f"hotkey: RegisterHotKey active ({parts})")
+            while user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
+                if msg.message == WM_HOTKEY:
+                    self._hotkey_fired()
+
+        thread = threading.Thread(target=_loop, daemon=True)
+        thread.start()
+        self._hotkey = _HotkeyHandle(thread)
+        return True
 
     def _hotkey_fired(self) -> None:
-        # pynput 线程里触发，转回 Qt 主线程执行
-        from PySide6.QtCore import QTimer
-
-        QTimer.singleShot(0, self.toggle)
+        # 热键线程里触发，经信号队列转回 Qt 主线程执行
+        self.toggle_requested.emit()
 
     # ---------- 菜单动作 ----------
 
@@ -305,8 +388,26 @@ class TrayApp:
         self.app.quit()
 
 
+def _acquire_single_instance() -> bool:
+    """命名互斥体防双开：双开会让热键触发两次（开+停互相抵消），表现像「没反应」。"""
+    if sys.platform != "win32":
+        return True
+    import ctypes
+
+    ctypes.windll.kernel32.CreateMutexW(None, False, "SnapStep_SingleInstance_Mutex")
+    return ctypes.windll.kernel32.GetLastError() != 183  # ERROR_ALREADY_EXISTS
+
+
 def run_gui() -> int:
     set_dpi_awareness()
+    if not _acquire_single_instance():
+        log_error("single instance check: already running")
+        import ctypes
+
+        ctypes.windll.user32.MessageBoxW(
+            None, "SnapStep 已在运行（看系统托盘图标）。", "SnapStep", 0x40
+        )
+        return 0
     from PySide6.QtWidgets import QApplication
 
     QApplication(sys.argv)

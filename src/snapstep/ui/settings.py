@@ -41,18 +41,27 @@ class SettingsDialog:
         self.edit_hotkey = QLineEdit(self.cfg.hotkey)
         self.edit_hotkey.setPlaceholderText("<ctrl>+<alt>+s")
         form_record.addRow("全局快捷键", self.edit_hotkey)
-        self.spin_delay = QSpinBox()
-        self.spin_delay.setRange(0, 2000)
-        self.spin_delay.setSuffix(" ms")
-        self.spin_delay.setValue(self.cfg.capture.delay_ms)
-        self.spin_delay.setToolTip("点击后等待片刻再截屏，让弹窗/菜单先弹出来")
-        form_record.addRow("截屏延迟", self.spin_delay)
+        self.spin_settle = QSpinBox()
+        self.spin_settle.setRange(0, 5000)
+        self.spin_settle.setSuffix(" ms")
+        self.spin_settle.setValue(self.cfg.capture.settle_max_ms)
+        self.spin_settle.setToolTip(
+            "点击后持续比对画面，界面停止变化即取「稳定帧」；这里是等待上限。\n"
+            "加载慢的界面调大，操作快的场景调小。"
+        )
+        form_record.addRow("界面稳定等待上限", self.spin_settle)
         self.check_privacy = QCheckBox("隐私模式（完全不截屏，只记录步骤）")
         self.check_privacy.setChecked(self.cfg.privacy.privacy_mode)
         form_record.addRow(self.check_privacy)
         self.check_mask = QCheckBox("密码框输入自动隐藏（尽力检测）")
         self.check_mask.setChecked(self.cfg.privacy.mask_passwords)
         form_record.addRow(self.check_mask)
+        self.check_filter = QCheckBox("自动过滤无变化的无效点击")
+        self.check_filter.setChecked(self.cfg.capture.filter_idle_clicks)
+        self.check_filter.setToolTip(
+            "停止录制时比对相邻步骤的画面，没点出任何变化且没有输入的点击会被剔除"
+        )
+        form_record.addRow(self.check_filter)
         root.addWidget(box_record)
 
         # ---- AI 文案 ----
@@ -126,7 +135,8 @@ class SettingsDialog:
         new_hotkey = safe_hotkey(self.edit_hotkey.text().strip())
         self.hotkey_changed = new_hotkey != self.cfg.hotkey
         self.cfg.hotkey = new_hotkey
-        self.cfg.capture.delay_ms = self.spin_delay.value()
+        self.cfg.capture.settle_max_ms = self.spin_settle.value()
+        self.cfg.capture.filter_idle_clicks = self.check_filter.isChecked()
         self.cfg.privacy.privacy_mode = self.check_privacy.isChecked()
         self.cfg.privacy.mask_passwords = self.check_mask.isChecked()
         self.cfg.api.base_url = self.edit_base_url.text().strip()
