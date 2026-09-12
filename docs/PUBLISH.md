@@ -212,6 +212,24 @@ Design decisions you might care about:
 MIT, Python 3.10+, source: https://github.com/Felixssss-106/snapstep
 ```
 
+### 2.6 渠道受阻备案（2026-09-12 实测）
+
+- **Reddit 帖被站级过滤器删**：给版组发消息求放行——收件人填版块名（如 r/SideProject）：
+  `Subject: Post removed by filter — genuine open-source project, requesting approval`
+  `Hi mods, my post about SnapStep was auto-removed by the spam filter. It's a MIT-licensed`
+  `open-source tool I built myself (repo: https://github.com/Felixssss-106/snapstep), not`
+  `commercial promotion. Could you approve it, or let me know if I should repost differently? Thanks!`
+  同时：改发 r/coolgithubprojects（几乎不过滤）；新号先在 r/Python 等版评论几天攒 karma；
+  发帖间隔拉开 1~2 天。
+- **V2EX 注册要邀请码**：只能找有账号的老用户要；拿不到就跳过，改用下面 2.7 的国内无门槛渠道。
+- **国内无门槛替代**：
+  - 掘金（手机号注册，发文章，标题《我开源了一个工具：按一次快捷键，把屏幕操作自动变成图文教程》，
+    正文要点同 §2.1 V2EX 定稿，展开成文章体并配 demo.gif / guide-html.png / settings.png 三图）
+  - HelloGitHub：hellogithub.com 登录后「提交项目」，描述一句话：
+    `按一次快捷键，把屏幕操作自动变成带标注截图的图文教程`
+  - 酷安：手机号注册，用 §2.2 即刻文案，结尾改「酷安的兄弟们帮忙测测 Win11 兼容性」
+  - 即刻：手机号注册即可（§2.2）
+
 ## 3. Awesome 列表 PR（发布后第 2~3 天）
 
 - awesome-windows、awesome-python（Applications 分类）
