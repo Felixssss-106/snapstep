@@ -25,15 +25,15 @@ export const RemotionRoot: React.FC = () => {
   return (
     <>
       <Folder name="分镜">
-        <Composition id="S1Hook" component={S1Hook} durationInFrames={240} {...V} />
-        <Composition id="S2Reveal" component={S2Reveal} durationInFrames={180} {...V} />
-        <Composition id="S3Flow" component={S3Flow} durationInFrames={195} {...V} />
-        <Composition id="S4Auto" component={S4Auto} durationInFrames={225} {...V} />
-        <Composition id="S5Export" component={S5Export} durationInFrames={210} {...V} />
-        <Composition id="S6CTA" component={S6CTA} durationInFrames={240} {...V} />
+        <Composition id="S1Hook" component={S1Hook} durationInFrames={225} {...V} />
+        <Composition id="S2Reveal" component={S2Reveal} durationInFrames={195} {...V} />
+        <Composition id="S3Flow" component={S3Flow} durationInFrames={255} {...V} />
+        <Composition id="S4Auto" component={S4Auto} durationInFrames={300} {...V} />
+        <Composition id="S5Export" component={S5Export} durationInFrames={240} {...V} />
+        <Composition id="S6CTA" component={S6CTA} durationInFrames={285} {...V} />
       </Folder>
 
-      <Composition id="Main" component={Main} durationInFrames={1200} {...V} />
+      <Composition id="Main" component={Main} durationInFrames={1410} {...V} />
       <Composition
         id="Cover"
         component={Cover}
