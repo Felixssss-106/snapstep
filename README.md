@@ -15,7 +15,7 @@ Record your screen, get a step-by-step guide — automatically.
 
 SnapStep 在后台监听你的鼠标和键盘：每次点击自动截图并标记位置，输入的文本自动记录。
 停止录制后，一份带序号截图的图文教程就生成好了 —— 支持 **Markdown / HTML / Word**，
-可选接入大模型把文案写得更自然。**开源版 Scribe / Tango 平替，数据不出你的电脑。**
+可选接入大模型把文案写得更自然。**开源版 Scribe / Tango 平替，数据完全保存在本地。**
 
 ---
 
