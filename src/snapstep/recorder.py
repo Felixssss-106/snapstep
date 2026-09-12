@@ -9,7 +9,9 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from .capture import mean_diff
 from .config import Config, sessions_dir
+from .log import log_error, log_info
 from .models import Session, Step, TypedRun
 
 # 键入停顿超过该秒数后，把已输入内容结算为一个 TypedRun
@@ -88,7 +90,7 @@ class EventAggregator:
 
 
 class Recorder:
-    """组合 pynput 全局钩子、延迟截屏与隐私检测，产出 Session。
+    """组合 pynput 全局钩子、双帧截屏（立即+稳定）与隐私检测，产出 Session。
 
     用法：
         recorder = Recorder(config)
@@ -114,6 +116,7 @@ class Recorder:
         self._flush_timer: threading.Timer | None = None
         self._lock = threading.Lock()
         self._stopped = threading.Event()
+        self._capture_threads: list[threading.Thread] = []
 
     # ---------- 生命周期 ----------
 
@@ -136,8 +139,12 @@ class Recorder:
             for listener in (self._keyboard_listener, self._mouse_listener):
                 if listener is not None:
                     listener.stop()
-            # 给在途的延迟截屏线程一点时间落盘（最多 delay_ms + 0.3s）
-            time.sleep(self.config.capture.delay_ms / 1000 + 0.3)
+            # 等在途的截屏线程落地（立即帧很快；稳定帧最多 settle_max_ms + 轮询间隔）
+            budget = self.config.capture.settle_max_ms / 1000 + 1.0
+            for thread in self._capture_threads:
+                thread.join(timeout=max(budget, 0.5))
+            self._capture_threads.clear()
+            self.finalize_session()
             self.agg.session.save(self.session_dir)
         return self.agg.session, self.session_dir
 
@@ -152,7 +159,7 @@ class Recorder:
         step = self.agg.begin_step(
             click_x=x,
             click_y=y,
-            monitor={},  # 稍后由截屏线程补全
+            monitor={},
             window_title=active_window_title(),
         )
         if self.on_step_captured:
@@ -162,32 +169,46 @@ class Recorder:
                 pass
         if self.config.privacy.privacy_mode:
             return
-        threading.Thread(
-            target=self._delayed_capture, args=(step, x, y), daemon=True
-        ).start()
+        thread = threading.Thread(
+            target=self._capture_candidates, args=(step, x, y), daemon=True
+        )
+        self._capture_threads.append(thread)
+        thread.start()
 
-    def _delayed_capture(self, step: Step, x: int, y: int) -> None:
-        from .capture import ScreenCapture, save_screenshot
+    def _capture_candidates(self, step: Step, x: int, y: int) -> None:
+        """为一步截取两帧候选：立即帧 + 稳定帧（最终选用哪帧在 finalize 时决定）。"""
+        from .capture import ScreenCapture, save_screenshot, settle_grab
 
-        time.sleep(max(self.config.capture.delay_ms, 0) / 1000)
         try:
             capture = ScreenCapture()
+            time.sleep(0.06)  # 让点击的按压反馈先画出来
             img, monitor = capture.capture_point(x, y)
-            # 截屏线程里补全显示器边界（begin_step 时拿不到 mss monitors）
-            step.monitor_left = monitor.get("left", 0)
-            step.monitor_top = monitor.get("top", 0)
-            step.monitor_width = monitor.get("width", 0)
-            step.monitor_height = monitor.get("height", 0)
-            rel = save_screenshot(
-                img,
-                self.session_dir,
-                step.index,
-                self.config.capture.image_format,
+            self._apply_monitor(step, monitor)
+            step.cand_immediate = save_screenshot(
+                img, self.session_dir, step.index, self.config.capture.image_format, "-imm"
             )
-            self.agg.attach_screenshot(step, rel)
-        except Exception:
+            settled, waited = settle_grab(
+                capture,
+                monitor,
+                max_wait_ms=self.config.capture.settle_max_ms,
+            )
+            log_info(
+                f"step {step.index}: settled after {waited}ms"
+                f" (max {self.config.capture.settle_max_ms}ms)"
+            )
+            step.cand_settled = save_screenshot(
+                settled, self.session_dir, step.index, self.config.capture.image_format, "-set"
+            )
+        except Exception as exc:
+            log_error(f"step {step.index} capture failed: {exc}")
             # 截屏失败不致命：该步退化为纯文字步骤
-            pass
+
+    @staticmethod
+    def _apply_monitor(step: Step, monitor: dict) -> None:
+        step.monitor_left = monitor.get("left", 0)
+        step.monitor_top = monitor.get("top", 0)
+        step.monitor_width = monitor.get("width", 0)
+        step.monitor_height = monitor.get("height", 0)
 
     # ---------- 键盘 ----------
 
@@ -270,3 +291,84 @@ class Recorder:
             self._run_is_secret = False
         if text:
             self.agg.append_text(text, is_secret=secret)
+
+    # ---------- 收尾：选片 + 过滤无效点击 + 重编号 ----------
+
+    # 平均像素差阈值：与上一步画面差异 < 2.0 视为「没有新信息」
+    IDLE_DIFF_THRESHOLD = 2.0
+    # 立即帧与稳定帧差异 > 4.0 视为「点击带来了明显的新状态」
+    CHANGE_DIFF_THRESHOLD = 4.0
+
+    def finalize_session(self) -> Session:
+        """停止后统一处理：为每步选帧、剔除无效点击、重新编号。
+
+        选帧规则：默认用立即帧（用户点击时看到的界面，Scribe 语义）；
+        但若立即帧与上一步选中的画面几乎相同、而稳定帧明显不同
+        （典型：点了链接等慢页面加载），说明新信息在稳定帧里，改用稳定帧。
+        """
+
+        session = self.agg.session
+        kept: list[Step] = []
+        prev_image: str | None = None
+        for step in session.steps:
+            step.screenshot = self._select_frame(step, prev_image)
+            if kept and self._is_idle_click(step, kept[-1]):
+                log_info(f"step {step.index}: dropped as idle click")
+                continue
+            kept.append(step)
+            if step.screenshot:
+                prev_image = step.screenshot
+        for i, step in enumerate(kept, 1):
+            step.index = i
+        session.steps = kept
+        return session
+
+    def _select_frame(self, step: Step, prev_image: str | None) -> str | None:
+        a, b = step.cand_immediate, step.cand_settled
+        if a is None and b is None:
+            # 旧会话或隐私模式：保持已有选片，绝不能覆盖成 None
+            return step.screenshot
+        if a is None:
+            return b
+        if b is None:
+            return a
+        if prev_image is not None:
+            try:
+
+                prev = self.session_dir / prev_image
+                if prev.exists():
+                    diff_prev_a = mean_diff(prev, self.session_dir / a)
+                    diff_a_b = mean_diff(
+                        self.session_dir / a, self.session_dir / b
+                    )
+                    if (
+                        diff_prev_a < self.IDLE_DIFF_THRESHOLD
+                        and diff_a_b > self.CHANGE_DIFF_THRESHOLD
+                    ):
+                        return b
+            except Exception as exc:
+                log_error(f"step {step.index} frame select failed: {exc}")
+        return a
+
+    def _is_idle_click(self, step: Step, prev: Step) -> bool:
+        """无效点击判定：本步无键入、无密码输入，且画面与上一步基本相同。"""
+        if not self.config.capture.filter_idle_clicks:
+            return False
+        if step.typed_runs:
+            return False
+        if step.screenshot and prev.screenshot:
+            try:
+
+                return (
+                    mean_diff(
+                        self.session_dir / prev.screenshot,
+                        self.session_dir / step.screenshot,
+                    )
+                    < self.IDLE_DIFF_THRESHOLD
+                )
+            except Exception:
+                return False
+        if not step.screenshot and not prev.screenshot:
+            # 隐私模式下没有图像可比：窗口相同且没有任何输入视为无效
+            return step.window_title == prev.window_title
+        return False

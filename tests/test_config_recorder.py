@@ -27,7 +27,7 @@ def test_config_tolerant_load(tmp_path, monkeypatch):
     monkeypatch.setattr("snapstep.config.config_path", lambda: path)
     cfg = load_config()
     assert cfg.hotkey == "<ctrl>+<f9>"
-    assert cfg.capture.delay_ms == 350  # 缺失字段走默认值
+    assert cfg.capture.settle_max_ms == 1500  # 缺失字段走默认值（旧配置的 delay_ms 已废弃）
 
 
 # ---------- EventAggregator ----------

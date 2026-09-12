@@ -41,7 +41,11 @@ class Step:
     monitor_top: int = 0
     monitor_width: int = 0
     monitor_height: int = 0
-    # 原始截图，相对 session 目录的路径；隐私模式或截屏失败时为 None
+    # 截图候选：立即帧（点击瞬间的界面，秒关的对话框也能截到）
+    # 与稳定帧（界面停止变化后的界面，慢加载页面等它加载完），
+    # 相对 session 目录的路径。screenshot 是最终选用的帧（见 recorder.finalize_session）。
+    cand_immediate: str | None = None
+    cand_settled: str | None = None
     screenshot: str | None = None
     typed_runs: list[TypedRun] = field(default_factory=list)
     # 由 writer（AI 或模板）生成的文案
