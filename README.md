@@ -36,7 +36,8 @@ SnapStep 在后台监听你的鼠标和键盘：每次点击自动截图并标�
 **pip**：
 
 ```bash
-pip install snapstep
+pip install snapstep        # PyPI 正式包
+pip install git+https://github.com/Felixssss-106/snapstep.git   # 或直接从源码安装
 snapstep          # 启动托盘 GUI
 ```
 

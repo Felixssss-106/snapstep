@@ -1,0 +1,30 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+jobs:
+  pypi:
+    # 需要 PyPI 侧配置 Trusted Publisher：
+    # pypi.org → Account management → Publishing → 新增 pending publisher
+    #   PyPI project name: snapstep
+    #   Owner: Felixssss-106  Repository: snapstep
+    #   Workflow name: publish.yml  Environment: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          twine check dist/*
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
