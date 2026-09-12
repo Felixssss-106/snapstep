@@ -9,7 +9,7 @@ import { S3Flow } from "./scenes/S3Flow";
 import { S4Auto } from "./scenes/S4Auto";
 import { S5Export } from "./scenes/S5Export";
 import { S6CTA } from "./scenes/S6CTA";
-import { Cover } from "./scenes/Cover";
+import { Cover, CoverEn } from "./scenes/Cover";
 
 // 中文与等宽字体，避免渲染机缺字回退
 loadNotoSansSC("normal", { weights: ["400", "500", "700"] });
@@ -37,6 +37,14 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Cover"
         component={Cover}
+        durationInFrames={1}
+        fps={30}
+        width={1280}
+        height={720}
+      />
+      <Composition
+        id="CoverEn"
+        component={CoverEn}
         durationInFrames={1}
         fps={30}
         width={1280}
