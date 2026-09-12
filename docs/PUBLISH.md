@@ -5,7 +5,8 @@
 
 ## 0. 发布前置清单
 
-- [ ] **录 30s 演示 GIF**（最重要的一项，README 的转化率全靠它）：
+- [x] **录 30s 演示 GIF**（2026-09-12 已完成，`docs/demo.gif`，1080px/10fps/1.7MB；
+  重录思路：ffmpeg ddagrab 抓屏 + `snapstep record` 子进程 + pynput 驱动真实操作 + Chrome `--app` 模式展示成品）
   1. Win+G 或用 ScreenToGif 录制
   2. 脚本：托盘点「开始录制」→ 打开一个真实软件（如 微信设置/浏览器书签整理）做 5~6 步操作（含一次输入）→ 停止 → 展示生成的 HTML 教程滚动浏览
   3. 导出 GIF，压缩到 < 8MB（gifski / ezgif），存为 `docs/demo.gif`，替换 README 中的 TODO 注释

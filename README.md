@@ -7,9 +7,7 @@ Record your screen, get a step-by-step guide — automatically.
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](pyproject.toml)
 
-<!-- TODO: 录制 30s 演示 GIF 后替换（步骤见 docs/PUBLISH.md）
-![demo](docs/demo.gif)
--->
+![SnapStep 演示：录屏自动生成图文教程](docs/demo.gif)
 
 SnapStep 在后台监听你的鼠标和键盘：每次点击自动截图并标记位置，输入的文本自动记录。
 停止录制后，一份带序号截图的图文教程就生成好了 —— 支持 **Markdown / HTML / Word**，
