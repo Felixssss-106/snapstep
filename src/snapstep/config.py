@@ -49,6 +49,7 @@ class ApiConfig:
 class ExportConfig:
     format: str = "html"  # md / html / docx
     embed_images: bool = True  # HTML 单文件内嵌 base64，方便直接分享
+    dir: str = ""  # 自定义导出目录（空 = 默认 <会话目录>/export）；支持 ~，相对路径基于用户主目录
 
 
 @dataclass

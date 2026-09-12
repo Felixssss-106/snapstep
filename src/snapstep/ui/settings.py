@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from ..config import API_PRESETS, Config, load_config, save_config
 
 
@@ -92,6 +94,16 @@ class SettingsDialog:
         self.combo_format.addItems(["html", "md", "docx"])
         self.combo_format.setCurrentText(self.cfg.export.format)
         form_export.addRow("默认格式", self.combo_format)
+        self.edit_export_dir = QLineEdit(self.cfg.export.dir)
+        self.edit_export_dir.setPlaceholderText("默认：<会话目录>\\export")
+        from PySide6.QtWidgets import QPushButton
+
+        row_dir = QHBoxLayout()
+        row_dir.addWidget(self.edit_export_dir)
+        btn_browse = QPushButton("浏览…")
+        btn_browse.clicked.connect(self._browse_export_dir)
+        row_dir.addWidget(btn_browse)
+        form_export.addRow("导出目录", row_dir)
         self.check_embed = QCheckBox("HTML 内嵌截图（单文件，方便分享）")
         self.check_embed.setChecked(self.cfg.export.embed_images)
         form_export.addRow(self.check_embed)
@@ -116,6 +128,15 @@ class SettingsDialog:
         self.combo_preset.currentTextChanged.connect(self._apply_preset)
 
         self._dialog = dialog
+
+    def _browse_export_dir(self) -> None:
+        from PySide6.QtWidgets import QFileDialog
+
+        chosen = QFileDialog.getExistingDirectory(
+            self._dialog, "选择导出目录", self.edit_export_dir.text() or str(Path.home())
+        )
+        if chosen:
+            self.edit_export_dir.setText(chosen)
 
     def _apply_preset(self, name: str) -> None:
         preset = API_PRESETS.get(name)
@@ -145,5 +166,6 @@ class SettingsDialog:
         self.cfg.api.language = self.combo_lang.currentText()
         self.cfg.export.format = self.combo_format.currentText()
         self.cfg.export.embed_images = self.check_embed.isChecked()
+        self.cfg.export.dir = self.edit_export_dir.text().strip()
         save_config(self.cfg)
         return True

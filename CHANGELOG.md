@@ -3,6 +3,14 @@
 所有显著变更记录在本文件。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [0.2.2] - 2026-09-12
+
+### Added
+
+- **自定义导出目录**：设置里可指定导出目录（支持「浏览…」选择与 ~ 路径），
+  录制/导出默认落到 `<导出目录>/SnapStep-<时间戳>/`，多次导出互不覆盖；
+  CLI `export --out` 显式指定仍然优先
+
 ## [0.2.1] - 2026-09-12
 
 ### Fixed

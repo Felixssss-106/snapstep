@@ -21,12 +21,35 @@ from .models import Session
 from .writer import AIWriter, TemplateWriter, apply_copy
 
 
+def resolve_export_dir(
+    cfg: Config, session_dir: Path, session: Session, explicit: Path | None = None
+) -> Path:
+    """决定导出目录：显式指定 > 配置项 > 默认 <会话目录>/export。
+
+    配置的自定义目录按会话建子文件夹（SnapStep-<时间戳>），避免多次导出互相覆盖。
+    """
+    if explicit is not None:
+        return explicit
+    raw = (cfg.export.dir or "").strip()
+    if not raw:
+        return session_dir / "export"
+    base = Path(raw).expanduser()
+    if not base.is_absolute():
+        base = Path.home() / base
+    ts = session.created_at or ""
+    slug = ts[:10].replace("-", "") + "-" + ts[11:19].replace(":", "")
+    if not slug.strip("-"):
+        slug = session.id
+    return base / f"SnapStep-{slug}"
+
+
 def generate_and_export(
     session: Session,
     session_dir: Path,
     cfg: Config,
     fmt: str | None = None,
     use_ai: bool | None = None,
+    out_dir: Path | None = None,
 ) -> tuple[str, list[Path]]:
     """生成文案并导出。CLI 与 GUI 共用。返回 (writer 名称, 导出文件列表)。"""
     from .export import export_session
@@ -39,8 +62,13 @@ def generate_and_export(
     )
     used = apply_copy(session, TemplateWriter(cfg.api.language), ai)
     session.save(session_dir)
+    target = resolve_export_dir(cfg, session_dir, session, out_dir)
     paths = export_session(
-        session, session_dir, fmt or cfg.export.format, None, cfg.export.embed_images
+        session,
+        session_dir,
+        fmt or cfg.export.format,
+        target,
+        cfg.export.embed_images,
     )
     return used, paths
 
