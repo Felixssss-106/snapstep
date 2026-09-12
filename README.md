@@ -143,29 +143,5 @@ Issue / PR 都欢迎。提交前请跑通 `pytest` 和 `ruff check`。
 ## License
 
 [MIT](LICENSE)
-
----
-
-## English
-
-**SnapStep** turns your on-screen actions into a polished, screenshot-annotated
-step-by-step guide — press a hotkey, do your work, press it again.
-
-- Global hotkey recording from the system tray (`Ctrl+Alt+S` by default)
-- Every click becomes a step: auto screenshot with a highlighted ring and step number,
-  typed text is captured into the step
-- Export to **Markdown**, a single-file **HTML** page (base64-embedded shots), or **Word**
-- Optional AI copywriting via any OpenAI-compatible API (GLM / DeepSeek / OpenAI /
-  local Ollama & LM Studio) — with a deterministic local template as zero-config fallback
-- Privacy-first: everything stays on your machine, no telemetry, password fields are
-  masked on a best-effort basis, privacy mode disables screenshots entirely
-
-```bash
-pip install snapstep
-snapstep demo   # generate a sample guide to verify the install
-```
-
-There may be issues with the software. Known issues in version V0.1.0 include non-functional keyboard shortcuts and inappropriate screenshot latency; these are currently being fixed.
-
 See the Chinese sections above for full docs — the UI is Chinese-first,
 and English UI is on the roadmap. English issues/PRs are welcome!
