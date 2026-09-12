@@ -117,7 +117,9 @@ snapstep config set api.api_key 你的key
 - [ ] PDF 导出、团队模板
 - [ ] macOS 支持
 
-软件可能存在问题，V0.1.0版本已知问题：快捷键无法使用，截屏延迟不合适，目前正在修复
+## 注意：软件可能存在问题
+V0.1.0版本已知问题：快捷键无法使用，截屏延迟不合适，v0.2.0已修复（v0.1.0已废弃）；
+自动过滤无效点击功能可能会漏记录，目前正在修复
 
 欢迎按 [issues](https://github.com/Felixssss-106/snapstep/issues) 提需求。
 
