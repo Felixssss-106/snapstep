@@ -18,9 +18,9 @@ class SettingsDialog:
             QCheckBox,
             QComboBox,
             QDialog,
-            QDialogButtonBox,
             QFormLayout,
             QGroupBox,
+            QHBoxLayout,
             QLineEdit,
             QSpinBox,
             QVBoxLayout,
@@ -89,10 +89,18 @@ class SettingsDialog:
         root.addWidget(box_export)
 
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
-        buttons.accepted.connect(dialog.accept)
-        buttons.rejected.connect(dialog.reject)
-        root.addWidget(buttons)
+        from PySide6.QtWidgets import QPushButton
+
+        buttons = QHBoxLayout()
+        buttons.addStretch(1)
+        btn_save = QPushButton("保存")
+        btn_save.setDefault(True)
+        btn_save.clicked.connect(dialog.accept)
+        btn_cancel = QPushButton("取消")
+        btn_cancel.clicked.connect(dialog.reject)
+        buttons.addWidget(btn_save)
+        buttons.addWidget(btn_cancel)
+        root.addLayout(buttons)
 
         # 预设切换 → 填充 base_url / model（用户改过就不覆盖）
         self._initial = (self.edit_base_url.text(), self.edit_model.text())

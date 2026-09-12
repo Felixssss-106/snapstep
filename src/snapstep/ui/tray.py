@@ -126,15 +126,16 @@ class TrayApp:
 
         self.tray = QSystemTrayIcon(QIcon(_tray_icon_path(False)))
         self.menu = QMenu()
-        self.action_toggle = QAction("开始录制")
+        # QAction 必须挂 parent：否则 __init__ 返回后被 GC 回收，菜单只剩第一项
+        self.action_toggle = QAction("开始录制", self.menu)
         self.action_toggle.triggered.connect(self.toggle)
-        action_folder = QAction("打开会话文件夹")
+        action_folder = QAction("打开会话文件夹", self.menu)
         action_folder.triggered.connect(self._open_sessions_dir)
-        action_export = QAction("导出上次会话")
+        action_export = QAction("导出上次会话", self.menu)
         action_export.triggered.connect(self._export_last)
-        action_settings = QAction("设置…")
+        action_settings = QAction("设置…", self.menu)
         action_settings.triggered.connect(self._open_settings)
-        action_quit = QAction("退出")
+        action_quit = QAction("退出", self.menu)
         action_quit.triggered.connect(self._quit)
 
         for item in (

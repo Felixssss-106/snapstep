@@ -10,11 +10,14 @@
 - [x] `pytest` 与 `ruff check` 全绿（27 passed / All checks passed，2026-09-12）
 - [x] 确认 `pyproject.toml` 的 Homepage/Issues URL 正确（全部指向 Felixssss-106/snapstep，与发布命令一致）
 - [x] 备用截图：`docs/screenshots/` 下已有 guide-html.png（首屏）、guide-html-full.png（整页）、guide-md.png（Markdown 源码）
-- [ ] **exe 本机交互实测**：打包/启动/托盘已验证 ✓；托盘菜单驱动的 录制→导出 与 设置对话框
-  两项交互实测待补（录制时检测到电脑正在被使用，为避免干扰输入而暂停）。
-  注意：本机 pynput 构建的 GlobalHotKeys 忽略 injected 事件，**自动化注入测不了热键**，
-  人工按 `Ctrl+Alt+S` 即可（物理键盘 injected=False，不受影响）
-- [ ] 补拍 `settings.png`（设置界面实机截图；Qt offscreen 渲染缺中文字体不可用）
+- [x] **exe 本机交互实测**（2026-09-12 全部通过，本地构建=CI 同 spec）：
+  启动/托盘 ✓；托盘菜单 开始录制→记事本操作→停止录制→自动导出 HTML→气泡通知 ✓；
+  设置对话框打开与中文按钮 ✓；托盘退出 ✓。
+  实测中抓到并修复：QAction 未挂 parent 被 GC 回收导致菜单只剩第一项（已修复）；
+  注意本机 pynput 构建的 GlobalHotKeys 忽略 injected 事件，自动化注入测不了热键，
+  人工按 `Ctrl+Alt+S` 即可（物理键盘不受影响）
+- [x] 备用截图：`docs/screenshots/` 下 settings.png（设置界面实机）、guide-html.png（首屏）、
+  guide-html-full.png（整页）、guide-md.png（Markdown 源码）
 - [ ] **安装 gh CLI**（本机未装）：`winget install GitHub.cli` 然后 `gh auth login`
 
 ## 1. 发布动作（顺序执行）
